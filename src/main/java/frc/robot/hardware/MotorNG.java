@@ -4,6 +4,10 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.software.Utils;
+
 public class MotorNG {
 
     public enum Model {
@@ -16,6 +20,7 @@ public class MotorNG {
     private CANSparkMax max;
     
     private double speed = 1.0;
+    private double lastPower = 0;
     public static Model DEFAULT_MODEL = Model.FALCON_500;
     private Model model = DEFAULT_MODEL;
     private boolean isReverse = false;
@@ -42,6 +47,7 @@ public class MotorNG {
         }
         else {
             max = new CANSparkMax(port, MotorType.kBrushless);   
+            max.getEncoder();
             setReverse(isReverse);
         }
     }
@@ -72,6 +78,10 @@ public class MotorNG {
 
     public void move(double value) {
 
+        if(value == lastPower) return;
+
+        lastPower = value;
+
         if(model == Model.FALCON_500 || model == Model.TALON_SRX) {
             srx.set(value * speed);
         }
@@ -82,6 +92,10 @@ public class MotorNG {
 
     public void stop() {
         move(0);
+    }
+
+    public double getCurrentPower() {
+        return lastPower;
     }
 
     public double getEncoderReading() {
